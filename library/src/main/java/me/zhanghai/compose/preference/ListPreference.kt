@@ -149,7 +149,8 @@ fun <T> ListPreference(
         ListPreferenceDefaults.item(type, valueToText),
 ) {
     var openSelector by rememberSaveable { mutableStateOf(false) }
-    // Put DropdownMenu before Preference so that it can anchor to the right position.
+    var displayValue by remember(value) { mutableStateOf(value) }
+
     if (openSelector) {
         when (type) {
             ListPreferenceType.ALERT_DIALOG -> {
@@ -157,7 +158,10 @@ fun <T> ListPreference(
                     onDismissRequest = { openSelector = false },
                     title = title,
                     buttons = {
-                        TextButton(onClick = { openSelector = false }) {
+                        TextButton(onClick = {
+                            openSelector = false
+                            displayValue = value
+                        }) {
                             Text(text = stringResource(android.R.string.cancel))
                         }
                     },
@@ -168,7 +172,8 @@ fun <T> ListPreference(
                         state = lazyListState,
                     ) {
                         items(values) { itemValue ->
-                            item(itemValue, value) {
+                            item(itemValue, displayValue) {
+                                displayValue = itemValue
                                 onValueChange(itemValue)
                                 openSelector = false
                             }
@@ -183,10 +188,14 @@ fun <T> ListPreference(
                 ) {
                     DropdownMenu(
                         expanded = openSelector,
-                        onDismissRequest = { openSelector = false },
+                        onDismissRequest = {
+                            openSelector = false
+                            displayValue = value
+                        },
                     ) {
                         for (itemValue in values) {
-                            item(itemValue, value) {
+                            item(itemValue, displayValue) {
+                                displayValue = itemValue
                                 onValueChange(itemValue)
                                 openSelector = false
                             }
