@@ -76,7 +76,6 @@ inline fun <T> LazyListScope.listPreference(
     noinline valueToText: (T) -> AnnotatedString = { AnnotatedString(it.toString()) },
     noinline item: @Composable (value: T, currentValue: T, onClick: () -> Unit) -> Unit =
         ListPreferenceDefaults.item(type, valueToText),
-    crossinline onValueChange: (T) -> Unit = {}
 ) {
     item(key = key, contentType = "ListPreference") {
         val state = rememberState()
@@ -92,9 +91,6 @@ inline fun <T> LazyListScope.listPreference(
             type = type,
             valueToText = valueToText,
             item = item,
-            onValueChange = { newValue -> // 추가된 부분
-                onValueChange(newValue)
-            }
         )
     }
 }
@@ -112,15 +108,11 @@ fun <T> ListPreference(
     valueToText: (T) -> AnnotatedString = { AnnotatedString(it.toString()) },
     item: @Composable (value: T, currentValue: T, onClick: () -> Unit) -> Unit =
         ListPreferenceDefaults.item(type, valueToText),
-    onValueChange: (T) -> Unit = {}, // 추가된 부분
 ) {
     var value by state
     ListPreference(
         value = value,
-        onValueChange = { newValue ->
-            value = newValue
-            onValueChange(newValue) // 추가된 부분
-        },
+        onValueChange = { value = it },
         values = values,
         title = title,
         modifier = modifier,
@@ -149,8 +141,7 @@ fun <T> ListPreference(
         ListPreferenceDefaults.item(type, valueToText),
 ) {
     var openSelector by rememberSaveable { mutableStateOf(false) }
-    var displayValue by remember(value) { mutableStateOf(value) }
-
+    // Put DropdownMenu before Preference so that it can anchor to the right position.
     if (openSelector) {
         when (type) {
             ListPreferenceType.ALERT_DIALOG -> {
@@ -158,10 +149,7 @@ fun <T> ListPreference(
                     onDismissRequest = { openSelector = false },
                     title = title,
                     buttons = {
-                        TextButton(onClick = {
-                            openSelector = false
-                            displayValue = value
-                        }) {
+                        TextButton(onClick = { openSelector = false }) {
                             Text(text = stringResource(android.R.string.cancel))
                         }
                     },
@@ -172,8 +160,7 @@ fun <T> ListPreference(
                         state = lazyListState,
                     ) {
                         items(values) { itemValue ->
-                            item(itemValue, displayValue) {
-                                displayValue = itemValue
+                            item(itemValue, value) {
                                 onValueChange(itemValue)
                                 openSelector = false
                             }
@@ -188,14 +175,10 @@ fun <T> ListPreference(
                 ) {
                     DropdownMenu(
                         expanded = openSelector,
-                        onDismissRequest = {
-                            openSelector = false
-                            displayValue = value
-                        },
+                        onDismissRequest = { openSelector = false },
                     ) {
                         for (itemValue in values) {
-                            item(itemValue, displayValue) {
-                                displayValue = itemValue
+                            item(itemValue, value) {
                                 onValueChange(itemValue)
                                 openSelector = false
                             }

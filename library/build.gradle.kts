@@ -77,7 +77,7 @@ publishing {
 
             groupId = "org.msgbot"
             artifactId = "compose-preference"
-            version = "1.0.0"
+            version = "1.0.7"
 
             afterEvaluate {
                 from(components["release"])
