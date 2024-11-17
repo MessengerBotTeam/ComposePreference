@@ -18,7 +18,7 @@ plugins {
     id("com.android.library")
     kotlin("android")
     kotlin("plugin.compose")
-    id("com.vanniktech.maven.publish")
+    `maven-publish`
 }
 
 android {
@@ -41,6 +41,13 @@ android {
             isMinifyEnabled = false
         }
     }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 }
 
 dependencies {
@@ -52,4 +59,29 @@ dependencies {
 
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.7")
+}
+
+publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/MessengerBotTeam/compose-preference")
+            credentials {
+                username = project.findProperty("gpr.user").toString() ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key").toString() ?: System.getenv("TOKEN")
+            }
+        }
+    }
+
+    publications {
+        register<MavenPublication>("release") {
+            groupId = "org.msgbot"
+            artifactId = "compose-preference"
+            version = "1.0.0"
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
 }
