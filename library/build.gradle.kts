@@ -62,19 +62,19 @@ dependencies {
 }
 
 publishing {
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/MessengerBotTeam/compose-preference")
-            credentials {
-                username = project.findProperty("gpr.user").toString() ?: System.getenv("USERNAME")
-                password = project.findProperty("gpr.key").toString() ?: System.getenv("TOKEN")
-            }
-        }
-    }
-
     publications {
         register<MavenPublication>("release") {
+            repositories {
+                maven {
+                    name = "GitHubPackages"
+                    url = uri("https://maven.pkg.github.com/MessengerBotTeam/ComposePreference")
+                    credentials {
+                        username = project.findProperty("gpr.user").toString() ?: System.getenv("USERNAME")
+                        password = project.findProperty("gpr.key").toString() ?: System.getenv("TOKEN")
+                    }
+                }
+            }
+
             groupId = "org.msgbot"
             artifactId = "compose-preference"
             version = "1.0.0"
