@@ -76,6 +76,7 @@ inline fun <T> LazyListScope.listPreference(
     noinline valueToText: (T) -> AnnotatedString = { AnnotatedString(it.toString()) },
     noinline item: @Composable (value: T, currentValue: T, onClick: () -> Unit) -> Unit =
         ListPreferenceDefaults.item(type, valueToText),
+    crossinline onValueChange: (T) -> Unit = {}
 ) {
     item(key = key, contentType = "ListPreference") {
         val state = rememberState()
@@ -91,6 +92,9 @@ inline fun <T> LazyListScope.listPreference(
             type = type,
             valueToText = valueToText,
             item = item,
+            onValueChange = { newValue -> // 추가된 부분
+                onValueChange(newValue)
+            }
         )
     }
 }
@@ -108,11 +112,15 @@ fun <T> ListPreference(
     valueToText: (T) -> AnnotatedString = { AnnotatedString(it.toString()) },
     item: @Composable (value: T, currentValue: T, onClick: () -> Unit) -> Unit =
         ListPreferenceDefaults.item(type, valueToText),
+    onValueChange: (T) -> Unit = {}, // 추가된 부분
 ) {
     var value by state
     ListPreference(
         value = value,
-        onValueChange = { value = it },
+        onValueChange = { newValue ->
+            value = newValue
+            onValueChange(newValue) // 추가된 부분
+        },
         values = values,
         title = title,
         modifier = modifier,
